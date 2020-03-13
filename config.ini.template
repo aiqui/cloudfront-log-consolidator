@@ -1,0 +1,22 @@
+; This is a configuration file for the CloudFront Logs Consolidator
+
+[logs]
+download-path = /DIR1/DIR2
+output-path = /DIR1/DIR2
+
+[s3]
+bucket = YOUR-BUCKET
+path = PATH
+
+[aws]
+access-id = AWS-ID
+access-key = AWS-KEY
+
+[aliases]
+CF-ID1 = name1
+CF-ID2 = name2
+CF-ID3 = name3
+
+
+
+
