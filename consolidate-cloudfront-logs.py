@@ -79,10 +79,15 @@ class ProcessLogs:
 
     def getEdgeLocation(self, aRow):
         """Get the AWS CloudFront edge location by city, county"""
+
         if self.aAWS_CF_EDGE_LOCATIONS is None:
-            with open(self.sAWS_CF_EDGE_LOCATION_FILE) as f:
+            sLocationPath = '%s/%s' % (self.sSCRIPT_DIR, self.sAWS_CF_EDGE_LOCATION_FILE)
+            if not os.path.exists(sLocationPath):
+                self.errorMsg('no edge location file: %s' % sLocationPath)
+            with open(sLocationPath) as f:
                 data = json.load(f)
                 self.aAWS_CF_EDGE_LOCATIONS = data['nodes']
+
         sLocation = aRow['edge-location']
         sAirport = sLocation[0:3]
         if sAirport in self.aAWS_CF_EDGE_LOCATIONS.keys():
