@@ -10,6 +10,7 @@ import json
 import boto3
 import configparser
 
+
 class ProcessLogs:
     aFIELDS = [
         'date',
@@ -51,6 +52,10 @@ class ProcessLogs:
 
     sAWS_CF_EDGE_LOCATION_FILE = 'cloudfront-edge-locations.json'
 
+    sSCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+    sCONFIG_FILE = 'config.ini'
+
     oPrinter = pprint.PrettyPrinter(indent=4)
 
     oConfig = configparser.ConfigParser()
@@ -64,9 +69,13 @@ class ProcessLogs:
     def initConfig(self):
         """Initialize the configuration"""
 
+        sConfigPath = '%s/%s' % (self.sSCRIPT_DIR, self.sCONFIG_FILE)
+        if not os.path.exists(sConfigPath):
+            self.errorMsg('no configuration file: %s' % sConfigPath)
+
         # Allow for case sensitivity in INI values
         self.oConfig.optionxform = str
-        self.oConfig.read('config.ini')
+        self.oConfig.read(sConfigPath)
 
     def getEdgeLocation(self, aRow):
         """Get the AWS CloudFront edge location by city, county"""
@@ -151,7 +160,6 @@ class ProcessLogs:
                     f.write(self.convertRow(aLine) + "\n")
         print("%s - %s - compile log: %s" % (sServer, sDay, sDayPath))
 
-
     def processServer(self, sCfId, sServer):
         """Process the complete set of files for a server"""
         print("\nProcess: %s => %s" % (sCfId, sServer))
@@ -196,16 +204,16 @@ class ProcessLogs:
         if self.oS3Client is None:
             aAwsConfig = self.oConfig['aws']
             self.oS3Client = boto3.client('s3',
-                                     aws_access_key_id=aAwsConfig['access-id'],
-                                     aws_secret_access_key=aAwsConfig['access-key'])
+                                          aws_access_key_id=aAwsConfig['access-id'],
+                                          aws_secret_access_key=aAwsConfig['access-key'])
         return self.oS3Client
 
     def getS3Files(self):
         """Get a list of the S3 log files"""
         aS3Config = self.oConfig['s3']
         oList = self.getS3Client().list_objects_v2(
-            Bucket = aS3Config['bucket'],
-            Prefix = aS3Config['path']
+            Bucket=aS3Config['bucket'],
+            Prefix=aS3Config['path']
         )
         aFiles = []
         for oItem in oList['Contents']:
@@ -214,9 +222,9 @@ class ProcessLogs:
                 aFiles.append(sFile)
         while oList['IsTruncated']:
             oList = self.getS3Client().list_objects_v2(
-                Bucket = aS3Config['bucket'],
-                Prefix = aS3Config['path'],
-                ContinuationToken = oList['NextContinuationToken']
+                Bucket=aS3Config['bucket'],
+                Prefix=aS3Config['path'],
+                ContinuationToken=oList['NextContinuationToken']
             )
             for oItem in oList['Contents']:
                 sFile = os.path.basename(oItem['Key'])
