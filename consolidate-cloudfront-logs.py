@@ -101,14 +101,14 @@ class ProcessLogs:
         aRow = dict(oZip)
         aRow['cs-user-agent'] = aRow['cs-user-agent'].replace('%20', ' ')
 
-        if aRow['x-host-header']:
+        if aRow['x-host-header'] and aRow['x-host-header'] is not '-':
             aRow['host'] = aRow['x-host-header']
         else:
             aRow['host'] = aRow['cs-host']
 
         aRow['request'] = '%s %s' % (aRow['cs-method'], aRow['cs-uri-stem'])
-        if aRow['cs-uri-query']:
-            aRow['request'] = aRow['request'] + '?' + aRow['cs-uri-query']
+        if aRow['cs-uri-query'] and aRow['cs-uri-query'] is not '-':
+            aRow['request'] += '?' + aRow['cs-uri-query']
         self.getEdgeLocation(aRow)
         return aRow
 
